@@ -9,34 +9,40 @@ architecture behavior of RegistersTest is
   component Registers is
     port(
       Clock: in std_logic;
-      Reset: in std_logic;
-      DataIn: in std_logic_vector(15 downto 0);
-      DataOut: out std_logic_vector(15 downto 0);
-      Address: in std_logic_vector(2 downto 0);
       Enable: in std_logic;
-      IsWrite: in std_logic
-      );
+      RegSelA: in std_logic_vector(3 downto 0);
+      RegSelB: in std_logic_vector(3 downto 0);
+      RegSelO: in std_logic_vector(3 downto 0);
+      DataA: out std_logic_vector(15 downto 0);
+      DataB: out std_logic_vector(15 downto 0);
+      DataO: in std_logic_vector(15 downto 0);
+      WriteEnable: in std_logic
+    );
   end component;
 
   signal Clock: std_logic := '0';
-  signal Reset: std_logic := '1';
-  signal DataIn: std_logic_vector(15 downto 0) := (others => '0');
-  signal DataOut: std_logic_vector(15 downto 0) := (others => '0');
-  signal Address: std_logic_vector(2 downto 0) := (others => '0');
-  signal Enable: std_logic := '0';
-  signal IsWrite: std_logic := '0';
+  signal Enable: std_logic := '1';
+  signal RegSelA: std_logic_vector(3 downto 0) := (others => '0');
+  signal RegSelB: std_logic_vector(3 downto 0) := (others => '0');
+  signal RegSelO: std_logic_vector(3 downto 0) := (others => '0');
+  signal DataA: std_logic_vector(15 downto 0) := (others => '0');
+  signal DataB: std_logic_vector(15 downto 0) := (others => '0');
+  signal DataO: std_logic_vector(15 downto 0) := (others => '0');
+  signal WriteEnable: std_logic := '0';
 
   constant clk: time := 1 ns;
 
   begin
     unit: Registers port map(
-      Reset => Reset,
       Clock => Clock,
-      DataIn => DataIn,
-      DataOut => DataOut,
-      Address => Address,
       Enable => Enable,
-      IsWrite => IsWrite
+      RegSelA => RegSelA,
+      RegSelB => RegSelB,
+      RegSelO => RegSelO,
+      DataA => DataA,
+      DataB => DataB,
+      DataO => DataO,
+      WriteEnable => WriteEnable
     );
 
     ClockProcess: process
@@ -49,29 +55,22 @@ architecture behavior of RegistersTest is
 
     MainProcess: process
     begin
-      -- start simulation
-      wait for clk*1;
-      Reset <= '0';
-
       -- test write
+      Enable <= '1';
+      WriteEnable <= '1';
       for i in 0 to 7 loop
-        Address <= std_logic_vector(to_unsigned(i, 3));
-        DataIn <= std_logic_vector(to_unsigned(i, 16));
-        IsWrite <= '1';
-        wait for clk*3;
-        Enable <= '1';
+        RegSelO <= std_logic_vector(to_unsigned(i, 4));
+        DataO <= std_logic_vector(to_unsigned(i, 16));
         wait for clk;
-        Enable <= '0';
       end loop;
 
       -- test read
-      for i in 0 to 7 loop
-        Address <= std_logic_vector(to_unsigned(i, 3));
-        IsWrite <= '0';
-        wait for clk*3;
-        Enable <= '1';
+      Enable <= '1';
+      WriteEnable <= '0';
+      for i in 0 to 3 loop
+        RegSelA <= std_logic_vector(to_unsigned(i*2+0, 4));
+        RegSelB <= std_logic_vector(to_unsigned(i*2+1, 4));
         wait for clk;
-        Enable <= '0';
       end loop;
       wait;
     end process;
