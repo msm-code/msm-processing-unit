@@ -20,29 +20,37 @@ begin
   process(Clock)
   begin
     if rising_edge(Clock) then
-      case AluOp is
-        when x"0" =>  -- LDL
-          ResultInternal <= X"00" & Immediate(7 downto 0);
-        when x"1" =>  -- LDH
-          ResultInternal <= Immediate(7 downto 0) & X"00";
-        when x"2" =>  -- ADD
-          ResultInternal <= std_logic_vector(unsigned(dataa) + unsigned(datab));
-        when X"3" =>  -- SUB
-          ResultInternal <= std_logic_vector(unsigned(DataA) - unsigned(DataB));
-        when X"4" =>  -- MUL
-          ResultInternal <= std_logic_vector(unsigned(DataA) * unsigned(DataB));
-        when X"5" =>  -- DIV
-          ResultInternal <= std_logic_vector(unsigned(DataA) / unsigned(DataB));
-        when X"6" =>  -- XOR
-          ResultInternal <= std_logic_vector(unsigned(DataA) xor unsigned(DataB));
-        when X"7" =>  -- OR
-          ResultInternal <= std_logic_vector(unsigned(DataA) or unsigned(DataB));
-        when X"8" =>  -- AND
-          ResultInternal <= std_logic_vector(unsigned(DataA) and unsigned(DataB));
-          -- JMP
-        when others =>
-          ResultInternal <= X"0000";
-      end case;
+      if Enable = '1' then
+        case AluOp is
+          when x"0" =>  -- LDL
+            ResultInternal <= X"00" & Immediate(7 downto 0);
+          when x"1" =>  -- LDH
+            ResultInternal <= Immediate(7 downto 0) & X"00";
+          when x"2" =>  -- ADD
+            ResultInternal <= std_logic_vector(unsigned(DataA) + unsigned(DataB));
+          when X"3" =>  -- SUB
+            ResultInternal <= std_logic_vector(unsigned(DataA) - unsigned(DataB));
+          when X"4" =>  -- MUL
+            ResultInternal <= std_logic_vector(unsigned(DataA) * unsigned(DataB));
+          when X"5" =>  -- DIV
+            ResultInternal <= std_logic_vector(unsigned(DataA) / unsigned(DataB));
+          when X"6" =>  -- XOR
+            ResultInternal <= std_logic_vector(unsigned(DataA) xor unsigned(DataB));
+          when X"7" =>  -- OR
+            ResultInternal <= std_logic_vector(unsigned(DataA) or unsigned(DataB));
+          when X"8" =>  -- AND
+            ResultInternal <= std_logic_vector(unsigned(DataA) and unsigned(DataB));
+          -- 9 => CMV
+          -- A => LDM R [R+Imm4]
+          -- B => STM R [R+Imm4]
+          -- C => ?
+          -- D => ?
+          -- E => ?
+          -- F => ?
+          when others =>
+            ResultInternal <= X"0000";
+        end case;
+      end if;
     end if;
   end process;
 

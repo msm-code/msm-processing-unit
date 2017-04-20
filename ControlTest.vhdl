@@ -10,13 +10,14 @@ architecture behavior of ControlTest is
     port(
       Clock: in std_logic;
       Enable: in std_logic;
+      WriteEnable: in std_logic;
       RegSelA: in std_logic_vector(3 downto 0);
       RegSelB: in std_logic_vector(3 downto 0);
       RegSelO: in std_logic_vector(3 downto 0);
       DataA: out std_logic_vector(15 downto 0);
       DataB: out std_logic_vector(15 downto 0);
       DataO: in std_logic_vector(15 downto 0);
-      WriteEnable: in std_logic
+      Pc: out std_logic_vector(15 downto 0)
     );
   end component;
 
@@ -55,6 +56,7 @@ architecture behavior of ControlTest is
   component Ram is
     port(
       Clock: in std_logic;
+      Enabled: in std_logic;
       WriteEnable: in std_logic;
       Address: in std_logic_vector(15 downto 0);
       InData: in std_logic_vector(15 downto 0);
@@ -106,6 +108,7 @@ architecture behavior of ControlTest is
       RegSelA => RegSelA,
       RegSelB => RegSelB,
       RegSelO => RegSelO,
+      Pc => ProgCounter,
       DataA => DataA,
       DataB => DataB,
       DataO => DataO,
@@ -129,6 +132,7 @@ architecture behavior of ControlTest is
 
     mem: Ram port map(
       Clock => Clock,
+      Enabled => EnableRegWrite,
       WriteEnable => RamWriteEnable,
       Address => RamAddress,
       InData => RamInData,
@@ -145,8 +149,7 @@ architecture behavior of ControlTest is
 
     RamWriteEnable <= '0';
     RamAddress <= ProgCounter;
-    RamOutData <= X"FFFF";
-    Instruction <= RamInData;
+    Instruction <= RamOutData;
 
     ClockProcess: process
     begin
@@ -158,12 +161,7 @@ architecture behavior of ControlTest is
 
     MainProcess: process
     begin
-      Instruction <= X"0301";  -- LDL A 01
-      wait for clk*4;
-      Instruction <= X"0402";  -- LDL B 02
-      wait for clk*4;
-      Instruction <= X"2534";  -- ADD C A B
-      wait for clk*4;
+      wait for clk*12;
       wait;
     end process;
 end;
